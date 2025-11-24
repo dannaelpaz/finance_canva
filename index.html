@@ -1,0 +1,1732 @@
+<!doctype html>
+<html lang="pt-BR">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle Financeiro Pessoal</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      height: 100%;
+      overflow-y: auto;
+    }
+    html {
+      height: 100%;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 20px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      opacity: 0.95;
+    }
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+    .btn-success {
+      background: #10b981;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    .btn-success:hover {
+      background: #059669;
+    }
+    .progress-bar {
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      transition: width 0.3s ease;
+    }
+    .tab-btn {
+      padding: 12px 24px;
+      border: none;
+      background: transparent;
+      color: #6b7280;
+      cursor: pointer;
+      font-weight: 600;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+    .input-field {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90%;
+      overflow-y: auto;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-success { background: #d1fae5; color: #065f46; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+    .spinner {
+      border: 3px solid #f3f4f6;
+      border-top-color: #667eea;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+      margin-left: 8px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .profile-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 24px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-align: center;
+    }
+    .profile-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: white;
+      color: #667eea;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: bold;
+      margin: 0 auto 12px;
+    }
+    #profile-selector {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100%;
+      padding: 40px 20px;
+    }
+    #main-app {
+      display: none;
+    }
+    .month-selector {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: white;
+      padding: 12px 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .month-btn {
+      background: #667eea;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+      font-size: 18px;
+      transition: background 0.2s;
+    }
+    .month-btn:hover {
+      background: #5568d3;
+    }
+    .paid-checkbox {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      accent-color: #10b981;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="bg-gradient-to-br from-purple-50 to-blue-50"><!-- Profile Selector Screen -->
+  <div id="profile-selector">
+   <div style="max-width: 1200px; width: 100%;">
+    <div class="text-center mb-12">
+     <h1 class="text-5xl font-bold text-gray-800 mb-4">👋 Bem-vindo!</h1>
+     <p class="text-xl text-gray-600">Selecione ou crie seu perfil financeiro</p>
+    </div>
+    <div id="profiles-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"></div>
+    <div class="text-center"><button onclick="showCreateProfileModal()" class="btn-primary text-lg px-8 py-4"> ➕ Criar Novo Perfil </button>
+    </div>
+   </div>
+  </div><!-- Main App -->
+  <div id="main-app" style="min-height: 100%; padding: 20px;">
+   <header class="mb-8 flex justify-between items-start flex-wrap gap-4">
+    <div>
+     <h1 id="app-title" class="text-4xl font-bold text-gray-800 mb-2">Controle Financeiro Pessoal</h1>
+     <p id="app-subtitle" class="text-gray-600">Gerencie suas finanças com inteligência</p>
+    </div>
+    <div class="flex items-center gap-4">
+     <div class="month-selector"><button class="month-btn" onclick="changeMonth(-1)">←</button>
+      <div class="text-center">
+       <div class="font-bold text-gray-800" id="current-month-display">
+        Dezembro 2024
+       </div>
+       <div class="text-xs text-gray-500">
+        Período de referência
+       </div>
+      </div><button class="month-btn" onclick="changeMonth(1)">→</button>
+     </div>
+     <div class="text-right">
+      <div class="flex items-center gap-3 mb-2">
+       <div id="current-profile-avatar" class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center text-white font-bold text-lg"></div>
+       <div>
+        <div class="font-bold text-gray-800" id="current-profile-name"></div><button onclick="switchProfile()" class="text-sm text-purple-600 hover:underline">Trocar Perfil</button>
+       </div>
+      </div>
+     </div>
+    </div>
+   </header>
+   <div class="mb-6 flex gap-2 overflow-x-auto pb-2"><button class="tab-btn active" data-tab="overview">📊 Visão Geral</button> <button class="tab-btn" data-tab="tracking">✅ Tracking Mensal</button> <button class="tab-btn" data-tab="income">💰 Renda</button> <button class="tab-btn" data-tab="cards">💳 Cartões &amp; Faturas</button> <button class="tab-btn" data-tab="fixed">📌 Despesas Fixas</button> <button class="tab-btn" data-tab="temporary">🛒 Despesas Temporárias</button> <button class="tab-btn" data-tab="loans">🏦 Empréstimos</button> <button class="tab-btn" data-tab="goals">🎯 Metas</button>
+   </div>
+   <div id="overview-tab" class="tab-content">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+     <div class="card">
+      <div class="text-gray-600 mb-2">
+       Renda Mensal
+      </div>
+      <div id="total-income" class="text-3xl font-bold text-green-600">
+       R$ 0,00
+      </div>
+     </div>
+     <div class="card">
+      <div class="text-gray-600 mb-2">
+       Total de Despesas
+      </div>
+      <div id="total-expenses" class="text-3xl font-bold text-red-600">
+       R$ 0,00
+      </div>
+     </div>
+     <div class="card">
+      <div class="text-gray-600 mb-2">
+       Disponível
+      </div>
+      <div id="available-income" class="text-3xl font-bold text-blue-600">
+       R$ 0,00
+      </div>
+     </div>
+    </div>
+    <div class="card mb-6">
+     <h2 class="text-xl font-bold mb-4">Comprometimento da Renda</h2>
+     <div class="space-y-4" id="commitment-breakdown"></div>
+    </div>
+    <div class="card">
+     <h2 class="text-xl font-bold mb-4">Priorização de Pagamentos</h2>
+     <p class="text-gray-600 mb-4">Dívidas ordenadas por impacto financeiro</p>
+     <div id="priority-list"></div>
+    </div>
+   </div>
+   <div id="tracking-tab" class="tab-content" style="display: none;">
+    <div class="card mb-6">
+     <h2 class="text-xl font-bold mb-4">📅 Tracking de Pagamentos - <span id="tracking-month-title"></span></h2>
+     <p class="text-gray-600 mb-4">Marque as despesas conforme você as paga durante o mês</p>
+     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="p-4 bg-blue-50 rounded-lg">
+       <div class="text-sm text-gray-600">
+        Total a Pagar
+       </div>
+       <div class="text-2xl font-bold text-blue-600" id="tracking-total">
+        R$ 0,00
+       </div>
+      </div>
+      <div class="p-4 bg-green-50 rounded-lg">
+       <div class="text-sm text-gray-600">
+        Já Pago
+       </div>
+       <div class="text-2xl font-bold text-green-600" id="tracking-paid">
+        R$ 0,00
+       </div>
+      </div>
+      <div class="p-4 bg-orange-50 rounded-lg">
+       <div class="text-sm text-gray-600">
+        Falta Pagar
+       </div>
+       <div class="text-2xl font-bold text-orange-600" id="tracking-remaining">
+        R$ 0,00
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="card mb-6">
+     <h3 class="text-lg font-bold mb-4">📌 Despesas Fixas</h3>
+     <div id="tracking-fixed-list"></div>
+    </div>
+    <div class="card mb-6">
+     <h3 class="text-lg font-bold mb-4">💳 Faturas de Cartões</h3>
+     <div id="tracking-invoices-list"></div>
+    </div>
+    <div class="card mb-6">
+     <h3 class="text-lg font-bold mb-4">🛒 Despesas Temporárias</h3>
+     <div id="tracking-temporary-list"></div>
+    </div>
+    <div class="card">
+     <h3 class="text-lg font-bold mb-4">🏦 Empréstimos</h3>
+     <div id="tracking-loans-list"></div>
+    </div>
+   </div>
+   <div id="income-tab" class="tab-content" style="display: none;">
+    <div class="card">
+     <h2 class="text-xl font-bold mb-4">Renda Mensal</h2>
+     <form id="income-form" class="space-y-4">
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">Valor da Renda Mensal</label> <input type="number" id="income-amount" class="input-field" placeholder="R$ 0,00" step="0.01" required>
+      </div><button type="submit" class="btn-primary" id="income-submit-btn">Salvar Renda</button>
+     </form>
+     <div id="income-display" class="mt-6"></div>
+    </div>
+   </div>
+   <div id="cards-tab" class="tab-content" style="display: none;">
+    <div class="card mb-6">
+     <h2 class="text-xl font-bold mb-4">Adicionar Cartão de Crédito</h2>
+     <form id="card-form" class="space-y-4">
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">Nome do Cartão</label> <input type="text" id="card-name" class="input-field" placeholder="Ex: Nubank Platinum" required>
+      </div>
+      <div class="grid grid-cols-3 gap-4">
+       <div><label class="block text-sm font-semibold text-gray-700 mb-2">Limite</label> <input type="number" id="card-limit" class="input-field" placeholder="R$ 0,00" step="0.01" required>
+       </div>
+       <div><label class="block text-sm font-semibold text-gray-700 mb-2">Dia Fechamento</label> <input type="number" id="card-closing" class="input-field" placeholder="5" min="1" max="31" required>
+       </div>
+       <div><label class="block text-sm font-semibold text-gray-700 mb-2">Dia Vencimento</label> <input type="number" id="card-due" class="input-field" placeholder="15" min="1" max="31" required>
+       </div>
+      </div><button type="submit" class="btn-primary" id="card-submit-btn">Adicionar Cartão</button>
+     </form>
+    </div>
+    <div class="card">
+     <h2 class="text-xl font-bold mb-4">Meus Cartões &amp; Faturas</h2>
+     <div id="cards-list"></div>
+    </div>
+   </div>
+   <div id="fixed-tab" class="tab-content" style="display: none;">
+    <div class="card mb-6">
+     <h2 class="text-xl font-bold mb-4">Adicionar Despesa Fixa</h2>
+     <form id="fixed-form" class="space-y-4">
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">Nome da Despesa</label> <input type="text" id="fixed-name" class="input-field" placeholder="Ex: Aluguel" required>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+       <div><label class="block text-sm font-semibold text-gray-700 mb-2">Categoria</label> <select id="fixed-category" class="input-field" required> <option value="">Selecione</option> <option value="Moradia">Moradia</option> <option value="Transporte">Transporte</option> <option value="Alimentação">Alimentação</option> <option value="Saúde">Saúde</option> <option value="Educação">Educação</option> <option value="Lazer">Lazer</option> <option value="Outros">Outros</option> </select>
+       </div>
+       <div><label class="block text-sm font-semibold text-gray-700 mb-2">Subcategoria</label> <input type="text" id="fixed-subcategory" class="input-field" placeholder="Ex: Condomínio">
+       </div>
+      </div>
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">Valor Mensal</label> <input type="number" id="fixed-amount" class="input-field" placeholder="R$ 0,00" step="0.01" required>
+      </div><button type="submit" class="btn-primary" id="fixed-submit-btn">Adicionar Despesa</button>
+     </form>
+    </div>
+    <div class="card">
+     <h2 class="text-xl font-bold mb-4">Despesas Fixas</h2>
+     <div id="fixed-list"></div>
+    </div>
+   </div>
+   <div id="temporary-tab" class="tab-content" style="display: none;">
+    <div class="card mb-6">
+     <h2 class="text-xl font-bold mb-4">Adicionar Despesa Temporária</h2>
+     <p class="text-sm text-gray-600 mb-4">Despesas parceladas ou temporárias sem vínculo com cartão</p>
+     <form id="temporary-form" class="space-y-4">
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">Nome da Despesa</label> <input type="text" id="temp-name" class="input-field" placeholder="Ex: Curso Online" required>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+       <div><label class="block text-sm font-semibold text-gray-700 mb-2">Categoria</label> <select id="temp-category" class="input-field" required> <option value="">Selecione</option> <option value="Educação">Educação</option> <option value="Saúde">Saúde</option> <option value="Serviços">Serviços</option> <option value="Outros">Outros</option> </select>
+       </div>
+       <div><label class="block text-sm font-semibold text-gray-700 mb-2">Subcategoria</label> <input type="text" id="temp-subcategory" class="input-field" placeholder="Ex: Desenvolvimento">
+       </div>
+      </div>
+      <div class="grid grid-cols-3 gap-4">
+       <div><label class="block text-sm font-semibold text-gray-700 mb-2">Valor Total</label> <input type="number" id="temp-amount" class="input-field" placeholder="R$ 0,00" step="0.01" required>
+       </div>
+       <div><label class="block text-sm font-semibold text-gray-700 mb-2">Total Parcelas</label> <input type="number" id="temp-installments" class="input-field" placeholder="12" min="1" required>
+       </div>
+       <div><label class="block text-sm font-semibold text-gray-700 mb-2">Parcelas Pagas</label> <input type="number" id="temp-paid" class="input-field" placeholder="0" min="0" required>
+       </div>
+      </div><button type="submit" class="btn-primary" id="temp-submit-btn">Adicionar Despesa</button>
+     </form>
+    </div>
+    <div class="card">
+     <h2 class="text-xl font-bold mb-4">Despesas Temporárias</h2>
+     <div id="temporary-list"></div>
+    </div>
+   </div>
+   <div id="loans-tab" class="tab-content" style="display: none;">
+    <div class="card mb-6">
+     <h2 class="text-xl font-bold mb-4">Adicionar Empréstimo/Financiamento</h2>
+     <form id="loan-form" class="space-y-4">
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">Nome</label> <input type="text" id="loan-name" class="input-field" placeholder="Ex: Financiamento Carro" required>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+       <div><label class="block text-sm font-semibold text-gray-700 mb-2">Valor Total</label> <input type="number" id="loan-amount" class="input-field" placeholder="R$ 0,00" step="0.01" required>
+       </div>
+       <div><label class="block text-sm font-semibold text-gray-700 mb-2">Taxa de Juros (% a.m.)</label> <input type="number" id="loan-rate" class="input-field" placeholder="1.5" step="0.01" required>
+       </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+       <div><label class="block text-sm font-semibold text-gray-700 mb-2">Prazo (meses)</label> <input type="number" id="loan-term" class="input-field" placeholder="60" min="1" required>
+       </div>
+       <div><label class="block text-sm font-semibold text-gray-700 mb-2">Parcelas Pagas</label> <input type="number" id="loan-paid" class="input-field" placeholder="0" min="0" required>
+       </div>
+      </div><button type="submit" class="btn-primary" id="loan-submit-btn">Adicionar Empréstimo</button>
+     </form>
+    </div>
+    <div class="card">
+     <h2 class="text-xl font-bold mb-4">Empréstimos e Financiamentos</h2>
+     <div id="loans-list"></div>
+    </div>
+   </div>
+   <div id="goals-tab" class="tab-content" style="display: none;">
+    <div class="card">
+     <h2 class="text-xl font-bold mb-4">Metas de Comprometimento</h2>
+     <p class="text-gray-600 mb-6">Configure as porcentagens ideais da sua renda para cada categoria</p>
+     <form id="goals-form" class="space-y-4">
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">Despesas Fixas (%)</label> <input type="number" id="goal-fixed" class="input-field" placeholder="50" min="0" max="100" step="1">
+      </div>
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">Despesas Temporárias (%)</label> <input type="number" id="goal-temporary" class="input-field" placeholder="20" min="0" max="100" step="1">
+      </div>
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">Empréstimos (%)</label> <input type="number" id="goal-loans" class="input-field" placeholder="15" min="0" max="100" step="1">
+      </div>
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">Lazer (%)</label> <input type="number" id="goal-leisure" class="input-field" placeholder="10" min="0" max="100" step="1">
+      </div>
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">Reserva/Investimento (%)</label> <input type="number" id="goal-savings" class="input-field" placeholder="5" min="0" max="100" step="1">
+      </div><button type="submit" class="btn-primary" id="goals-submit-btn">Salvar Metas</button>
+     </form>
+     <div id="goals-display" class="mt-6"></div>
+    </div>
+   </div>
+  </div><!-- Create Profile Modal -->
+  <div id="create-profile-modal" class="modal">
+   <div class="modal-content">
+    <h2 class="text-2xl font-bold mb-6">Criar Novo Perfil</h2>
+    <form id="create-profile-form" class="space-y-4">
+     <div><label class="block text-sm font-semibold text-gray-700 mb-2">Nome do Perfil</label> <input type="text" id="profile-name-input" class="input-field" placeholder="Ex: João Silva" required>
+     </div>
+     <div><label class="block text-sm font-semibold text-gray-700 mb-2">Emoji/Avatar</label>
+      <div class="grid grid-cols-6 gap-2" id="emoji-selector"><button type="button" class="text-3xl p-2 hover:bg-gray-100 rounded" data-emoji="👤">👤</button> <button type="button" class="text-3xl p-2 hover:bg-gray-100 rounded" data-emoji="👨">👨</button> <button type="button" class="text-3xl p-2 hover:bg-gray-100 rounded" data-emoji="👩">👩</button> <button type="button" class="text-3xl p-2 hover:bg-gray-100 rounded" data-emoji="🧑">🧑</button> <button type="button" class="text-3xl p-2 hover:bg-gray-100 rounded" data-emoji="👨‍💼">👨‍💼</button> <button type="button" class="text-3xl p-2 hover:bg-gray-100 rounded" data-emoji="👩‍💼">👩‍💼</button> <button type="button" class="text-3xl p-2 hover:bg-gray-100 rounded" data-emoji="🏠">🏠</button> <button type="button" class="text-3xl p-2 hover:bg-gray-100 rounded" data-emoji="💼">💼</button> <button type="button" class="text-3xl p-2 hover:bg-gray-100 rounded" data-emoji="🎓">🎓</button> <button type="button" class="text-3xl p-2 hover:bg-gray-100 rounded" data-emoji="👨‍👩‍👧">👨‍👩‍👧</button> <button type="button" class="text-3xl p-2 hover:bg-gray-100 rounded" data-emoji="💰">💰</button> <button type="button" class="text-3xl p-2 hover:bg-gray-100 rounded" data-emoji="🌟">🌟</button>
+      </div><input type="hidden" id="selected-emoji" value="👤">
+     </div>
+     <div class="flex gap-3 mt-6"><button type="submit" class="btn-primary flex-1" id="create-profile-btn">Criar Perfil</button> <button type="button" onclick="closeCreateProfileModal()" class="btn-secondary">Cancelar</button>
+     </div>
+    </form>
+   </div>
+  </div><!-- Add Invoice Modal -->
+  <div id="add-invoice-modal" class="modal">
+   <div class="modal-content">
+    <h2 class="text-2xl font-bold mb-6">Adicionar Fatura</h2>
+    <form id="invoice-form" class="space-y-4"><input type="hidden" id="invoice-card-id">
+     <div><label class="block text-sm font-semibold text-gray-700 mb-2">Descrição da Compra</label> <input type="text" id="invoice-name" class="input-field" placeholder="Ex: Compras Mercado" required>
+     </div>
+     <div class="grid grid-cols-2 gap-4">
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">Valor Total</label> <input type="number" id="invoice-amount" class="input-field" placeholder="R$ 0,00" step="0.01" required>
+      </div>
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">Parcelas</label> <input type="number" id="invoice-installments" class="input-field" placeholder="1" min="1" value="1" required>
+      </div>
+     </div>
+     <div><label class="block text-sm font-semibold text-gray-700 mb-2">Data da Compra</label> <input type="date" id="invoice-date" class="input-field" required>
+     </div>
+     <div class="flex gap-3 mt-6"><button type="submit" class="btn-primary flex-1" id="invoice-submit-btn">Adicionar Fatura</button> <button type="button" onclick="closeInvoiceModal()" class="btn-secondary">Cancelar</button>
+     </div>
+    </form>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      app_title: "Controle Financeiro Pessoal",
+      dashboard_subtitle: "Gerencie suas finanças com inteligência",
+      background_color: "#f9fafb",
+      primary_color: "#667eea",
+      text_color: "#1f2937",
+      success_color: "#10b981",
+      danger_color: "#ef4444"
+    };
+
+    let allRecords = [];
+    let currentRecordCount = 0;
+    let currentProfile = null;
+    let allProfiles = [];
+    let currentMonth = new Date();
+
+    const dataHandler = {
+      onDataChanged(data) {
+        allRecords = data;
+        currentRecordCount = data.length;
+        
+        allProfiles = allRecords.filter(r => r.type === 'profile');
+        
+        if (document.getElementById('profile-selector').style.display !== 'none') {
+          updateProfilesGrid();
+        }
+        
+        if (currentProfile) {
+          updateAllDisplays();
+        }
+      }
+    };
+
+    async function initializeApp() {
+      const result = await window.dataSdk.init(dataHandler);
+      if (!result.isOk) {
+        console.error("Failed to initialize SDK");
+        return;
+      }
+      
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (config) => {
+            document.getElementById('app-title').textContent = config.app_title || defaultConfig.app_title;
+            document.getElementById('app-subtitle').textContent = config.dashboard_subtitle || defaultConfig.dashboard_subtitle;
+          },
+          mapToCapabilities: (config) => ({
+            recolorables: [
+              {
+                get: () => config.primary_color || defaultConfig.primary_color,
+                set: (value) => {
+                  window.elementSdk.config.primary_color = value;
+                  window.elementSdk.setConfig({ primary_color: value });
+                }
+              }
+            ],
+            borderables: [],
+            fontEditable: undefined,
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ["app_title", config.app_title || defaultConfig.app_title],
+            ["dashboard_subtitle", config.dashboard_subtitle || defaultConfig.dashboard_subtitle]
+          ])
+        });
+      }
+
+      setupTabs();
+      setupForms();
+      setupEmojiSelector();
+      updateMonthDisplay();
+      
+      const today = new Date();
+      document.getElementById('invoice-date').value = today.toISOString().split('T')[0];
+    }
+
+    function getCurrentMonthKey() {
+      return `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    function changeMonth(delta) {
+      currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + delta, 1);
+      updateMonthDisplay();
+      updateAllDisplays();
+    }
+
+    function updateMonthDisplay() {
+      const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                         'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+      const display = `${monthNames[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`;
+      document.getElementById('current-month-display').textContent = display;
+      document.getElementById('tracking-month-title').textContent = display;
+    }
+
+    function updateProfilesGrid() {
+      const grid = document.getElementById('profiles-grid');
+      grid.innerHTML = '';
+      
+      if (allProfiles.length === 0) {
+        grid.innerHTML = '<div class="col-span-full text-center text-gray-500">Nenhum perfil criado ainda. Clique em "Criar Novo Perfil" para começar!</div>';
+        return;
+      }
+      
+      allProfiles.forEach(profile => {
+        const card = document.createElement('div');
+        card.className = 'profile-card';
+        card.onclick = () => selectProfile(profile);
+        card.innerHTML = `
+          <div class="profile-avatar">${profile.category || '👤'}</div>
+          <h3 class="text-xl font-bold">${profile.name}</h3>
+          <p class="text-sm opacity-90 mt-2">Clique para acessar</p>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function selectProfile(profile) {
+      currentProfile = profile;
+      
+      document.getElementById('current-profile-name').textContent = profile.name;
+      document.getElementById('current-profile-avatar').textContent = profile.category || '👤';
+      
+      document.getElementById('profile-selector').style.display = 'none';
+      document.getElementById('main-app').style.display = 'block';
+      
+      updateAllDisplays();
+    }
+
+    function switchProfile() {
+      currentProfile = null;
+      document.getElementById('main-app').style.display = 'none';
+      document.getElementById('profile-selector').style.display = 'flex';
+      updateProfilesGrid();
+    }
+
+    function showCreateProfileModal() {
+      document.getElementById('create-profile-modal').classList.add('active');
+    }
+
+    function closeCreateProfileModal() {
+      document.getElementById('create-profile-modal').classList.remove('active');
+      document.getElementById('create-profile-form').reset();
+      document.getElementById('selected-emoji').value = '👤';
+    }
+
+    function showInvoiceModal(cardId) {
+      document.getElementById('invoice-card-id').value = cardId;
+      document.getElementById('add-invoice-modal').classList.add('active');
+    }
+
+    function closeInvoiceModal() {
+      document.getElementById('add-invoice-modal').classList.remove('active');
+      document.getElementById('invoice-form').reset();
+    }
+
+    function setupEmojiSelector() {
+      const emojiButtons = document.querySelectorAll('#emoji-selector button');
+      emojiButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.getElementById('selected-emoji').value = btn.dataset.emoji;
+          emojiButtons.forEach(b => b.classList.remove('bg-purple-200'));
+          btn.classList.add('bg-purple-200');
+        });
+      });
+    }
+
+    function setupTabs() {
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tabName = btn.dataset.tab;
+          tabBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          
+          document.querySelectorAll('.tab-content').forEach(content => {
+            content.style.display = 'none';
+          });
+          document.getElementById(`${tabName}-tab`).style.display = 'block';
+        });
+      });
+    }
+
+    function setupForms() {
+      document.getElementById('create-profile-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (currentRecordCount >= 999) {
+          showInlineMessage('create-profile-form', 'Limite de 999 registros atingido', 'danger');
+          return;
+        }
+        
+        const btn = document.getElementById('create-profile-btn');
+        btn.disabled = true;
+        btn.innerHTML = 'Criando...<span class="spinner"></span>';
+        
+        const profileName = document.getElementById('profile-name-input').value;
+        const emoji = document.getElementById('selected-emoji').value;
+        
+        const result = await window.dataSdk.create({
+          id: `profile-${Date.now()}`,
+          type: 'profile',
+          name: profileName,
+          category: emoji,
+          is_active: true,
+          created_at: new Date().toISOString()
+        });
+        
+        btn.disabled = false;
+        btn.innerHTML = 'Criar Perfil';
+        
+        if (result.isOk) {
+          closeCreateProfileModal();
+        } else {
+          showInlineMessage('create-profile-form', 'Erro ao criar perfil', 'danger');
+        }
+      });
+
+      document.getElementById('income-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentProfile) return;
+        if (currentRecordCount >= 999) {
+          showInlineMessage('income-form', 'Limite de 999 registros atingido', 'danger');
+          return;
+        }
+        
+        const btn = document.getElementById('income-submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = 'Salvando...<span class="spinner"></span>';
+        
+        const amount = parseFloat(document.getElementById('income-amount').value);
+        const existingIncome = allRecords.find(r => r.type === 'income' && r.profile_id === currentProfile.id);
+        
+        if (existingIncome) {
+          existingIncome.amount = amount;
+          const result = await window.dataSdk.update(existingIncome);
+          if (!result.isOk) {
+            showInlineMessage('income-form', 'Erro ao atualizar renda', 'danger');
+          }
+        } else {
+          const result = await window.dataSdk.create({
+            id: `income-${Date.now()}`,
+            type: 'income',
+            name: 'Renda Mensal',
+            amount: amount,
+            profile_id: currentProfile.id,
+            is_active: true,
+            created_at: new Date().toISOString()
+          });
+          if (!result.isOk) {
+            showInlineMessage('income-form', 'Erro ao salvar renda', 'danger');
+          }
+        }
+        
+        btn.disabled = false;
+        btn.innerHTML = 'Salvar Renda';
+        document.getElementById('income-form').reset();
+      });
+
+      document.getElementById('card-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentProfile) return;
+        if (currentRecordCount >= 999) {
+          showInlineMessage('card-form', 'Limite de 999 registros atingido', 'danger');
+          return;
+        }
+        
+        const btn = document.getElementById('card-submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = 'Adicionando...<span class="spinner"></span>';
+        
+        const result = await window.dataSdk.create({
+          id: `card-${Date.now()}`,
+          type: 'card',
+          name: document.getElementById('card-name').value,
+          amount: parseFloat(document.getElementById('card-limit').value),
+          closing_day: parseInt(document.getElementById('card-closing').value),
+          due_day: parseInt(document.getElementById('card-due').value),
+          profile_id: currentProfile.id,
+          is_active: true,
+          created_at: new Date().toISOString()
+        });
+        
+        if (!result.isOk) {
+          showInlineMessage('card-form', 'Erro ao adicionar cartão', 'danger');
+        }
+        
+        btn.disabled = false;
+        btn.innerHTML = 'Adicionar Cartão';
+        document.getElementById('card-form').reset();
+      });
+
+      document.getElementById('invoice-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentProfile) return;
+        if (currentRecordCount >= 999) {
+          showInlineMessage('invoice-form', 'Limite de 999 registros atingido', 'danger');
+          return;
+        }
+        
+        const btn = document.getElementById('invoice-submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = 'Adicionando...<span class="spinner"></span>';
+        
+        const cardId = document.getElementById('invoice-card-id').value;
+        const amount = parseFloat(document.getElementById('invoice-amount').value);
+        const installments = parseInt(document.getElementById('invoice-installments').value);
+        const purchaseDate = new Date(document.getElementById('invoice-date').value);
+        
+        const result = await window.dataSdk.create({
+          id: `invoice-${Date.now()}`,
+          type: 'invoice',
+          name: document.getElementById('invoice-name').value,
+          card_id: cardId,
+          amount: amount,
+          installments_total: installments,
+          installments_paid: 0,
+          profile_id: currentProfile.id,
+          is_active: true,
+          created_at: purchaseDate.toISOString()
+        });
+        
+        if (!result.isOk) {
+          showInlineMessage('invoice-form', 'Erro ao adicionar fatura', 'danger');
+        }
+        
+        btn.disabled = false;
+        btn.innerHTML = 'Adicionar Fatura';
+        closeInvoiceModal();
+      });
+
+      document.getElementById('fixed-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentProfile) return;
+        if (currentRecordCount >= 999) {
+          showInlineMessage('fixed-form', 'Limite de 999 registros atingido', 'danger');
+          return;
+        }
+        
+        const btn = document.getElementById('fixed-submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = 'Adicionando...<span class="spinner"></span>';
+        
+        const result = await window.dataSdk.create({
+          id: `fixed-${Date.now()}`,
+          type: 'fixed',
+          name: document.getElementById('fixed-name').value,
+          category: document.getElementById('fixed-category').value,
+          subcategory: document.getElementById('fixed-subcategory').value,
+          amount: parseFloat(document.getElementById('fixed-amount').value),
+          profile_id: currentProfile.id,
+          is_active: true,
+          created_at: new Date().toISOString()
+        });
+        
+        if (!result.isOk) {
+          showInlineMessage('fixed-form', 'Erro ao adicionar despesa', 'danger');
+        }
+        
+        btn.disabled = false;
+        btn.innerHTML = 'Adicionar Despesa';
+        document.getElementById('fixed-form').reset();
+      });
+
+      document.getElementById('temporary-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentProfile) return;
+        if (currentRecordCount >= 999) {
+          showInlineMessage('temporary-form', 'Limite de 999 registros atingido', 'danger');
+          return;
+        }
+        
+        const btn = document.getElementById('temp-submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = 'Adicionando...<span class="spinner"></span>';
+        
+        const result = await window.dataSdk.create({
+          id: `temp-${Date.now()}`,
+          type: 'temporary',
+          name: document.getElementById('temp-name').value,
+          category: document.getElementById('temp-category').value,
+          subcategory: document.getElementById('temp-subcategory').value,
+          amount: parseFloat(document.getElementById('temp-amount').value),
+          installments_total: parseInt(document.getElementById('temp-installments').value),
+          installments_paid: parseInt(document.getElementById('temp-paid').value),
+          profile_id: currentProfile.id,
+          is_active: true,
+          created_at: new Date().toISOString()
+        });
+        
+        if (!result.isOk) {
+          showInlineMessage('temporary-form', 'Erro ao adicionar despesa', 'danger');
+        }
+        
+        btn.disabled = false;
+        btn.innerHTML = 'Adicionar Despesa';
+        document.getElementById('temporary-form').reset();
+      });
+
+      document.getElementById('loan-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentProfile) return;
+        if (currentRecordCount >= 999) {
+          showInlineMessage('loan-form', 'Limite de 999 registros atingido', 'danger');
+          return;
+        }
+        
+        const btn = document.getElementById('loan-submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = 'Adicionando...<span class="spinner"></span>';
+        
+        const result = await window.dataSdk.create({
+          id: `loan-${Date.now()}`,
+          type: 'loan',
+          name: document.getElementById('loan-name').value,
+          amount: parseFloat(document.getElementById('loan-amount').value),
+          interest_rate: parseFloat(document.getElementById('loan-rate').value),
+          term_months: parseInt(document.getElementById('loan-term').value),
+          installments_paid: parseInt(document.getElementById('loan-paid').value),
+          profile_id: currentProfile.id,
+          is_active: true,
+          created_at: new Date().toISOString()
+        });
+        
+        if (!result.isOk) {
+          showInlineMessage('loan-form', 'Erro ao adicionar empréstimo', 'danger');
+        }
+        
+        btn.disabled = false;
+        btn.innerHTML = 'Adicionar Empréstimo';
+        document.getElementById('loan-form').reset();
+      });
+
+      document.getElementById('goals-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentProfile) return;
+        if (currentRecordCount >= 999) {
+          showInlineMessage('goals-form', 'Limite de 999 registros atingido', 'danger');
+          return;
+        }
+        
+        const btn = document.getElementById('goals-submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = 'Salvando...<span class="spinner"></span>';
+        
+        const existingGoals = allRecords.find(r => r.type === 'goals' && r.profile_id === currentProfile.id);
+        const goalsData = {
+          id: existingGoals ? existingGoals.id : `goals-${Date.now()}`,
+          type: 'goals',
+          name: 'Metas de Comprometimento',
+          category: document.getElementById('goal-fixed').value || '50',
+          subcategory: document.getElementById('goal-temporary').value || '20',
+          amount: parseFloat(document.getElementById('goal-loans').value || '15'),
+          interest_rate: parseFloat(document.getElementById('goal-leisure').value || '10'),
+          term_months: parseInt(document.getElementById('goal-savings').value || '5'),
+          profile_id: currentProfile.id,
+          is_active: true,
+          created_at: existingGoals ? existingGoals.created_at : new Date().toISOString()
+        };
+        
+        if (existingGoals) {
+          Object.assign(existingGoals, goalsData);
+          const result = await window.dataSdk.update(existingGoals);
+          if (!result.isOk) {
+            showInlineMessage('goals-form', 'Erro ao atualizar metas', 'danger');
+          }
+        } else {
+          const result = await window.dataSdk.create(goalsData);
+          if (!result.isOk) {
+            showInlineMessage('goals-form', 'Erro ao salvar metas', 'danger');
+          }
+        }
+        
+        btn.disabled = false;
+        btn.innerHTML = 'Salvar Metas';
+      });
+    }
+
+    function showInlineMessage(formId, message, type) {
+      const form = document.getElementById(formId);
+      const existing = form.querySelector('.inline-message');
+      if (existing) existing.remove();
+      
+      const div = document.createElement('div');
+      div.className = `inline-message mt-4 p-3 rounded-lg ${type === 'danger' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
+      div.textContent = message;
+      form.appendChild(div);
+      
+      setTimeout(() => div.remove(), 3000);
+    }
+
+    function getProfileRecords() {
+      if (!currentProfile) return [];
+      return allRecords.filter(r => r.profile_id === currentProfile.id);
+    }
+
+    function updateAllDisplays() {
+      if (!currentProfile) return;
+      updateOverview();
+      updateIncomeDisplay();
+      updateCardsDisplay();
+      updateFixedDisplay();
+      updateTemporaryDisplay();
+      updateLoansDisplay();
+      updateGoalsDisplay();
+      updateTrackingDisplay();
+    }
+
+    function updateOverview() {
+      const profileRecords = getProfileRecords();
+      const income = profileRecords.find(r => r.type === 'income');
+      const totalIncome = income ? income.amount : 0;
+      
+      const fixedExpenses = profileRecords.filter(r => r.type === 'fixed' && r.is_active)
+        .reduce((sum, r) => sum + r.amount, 0);
+      
+      const tempExpenses = profileRecords.filter(r => r.type === 'temporary' && r.is_active)
+        .reduce((sum, r) => {
+          const monthlyInstallment = r.amount / r.installments_total;
+          return sum + monthlyInstallment;
+        }, 0);
+      
+      const invoiceExpenses = profileRecords.filter(r => r.type === 'invoice' && r.is_active)
+        .reduce((sum, r) => {
+          const monthlyInstallment = r.amount / r.installments_total;
+          return sum + monthlyInstallment;
+        }, 0);
+      
+      const loanExpenses = profileRecords.filter(r => r.type === 'loan' && r.is_active)
+        .reduce((sum, r) => {
+          const monthlyPayment = calculateLoanPayment(r.amount, r.interest_rate, r.term_months);
+          return sum + monthlyPayment;
+        }, 0);
+      
+      const totalExpenses = fixedExpenses + tempExpenses + invoiceExpenses + loanExpenses;
+      const available = totalIncome - totalExpenses;
+      
+      document.getElementById('total-income').textContent = formatCurrency(totalIncome);
+      document.getElementById('total-expenses').textContent = formatCurrency(totalExpenses);
+      document.getElementById('available-income').textContent = formatCurrency(available);
+      
+      const commitmentEl = document.getElementById('commitment-breakdown');
+      commitmentEl.innerHTML = '';
+      
+      if (totalIncome > 0) {
+        addCommitmentBar(commitmentEl, 'Despesas Fixas', fixedExpenses, totalIncome, '#667eea');
+        addCommitmentBar(commitmentEl, 'Despesas Temporárias', tempExpenses, totalIncome, '#764ba2');
+        addCommitmentBar(commitmentEl, 'Faturas de Cartão', invoiceExpenses, totalIncome, '#8b5cf6');
+        addCommitmentBar(commitmentEl, 'Empréstimos', loanExpenses, totalIncome, '#f59e0b');
+        addCommitmentBar(commitmentEl, 'Disponível', available, totalIncome, '#10b981');
+      }
+      
+      updatePriorityList(totalIncome, profileRecords);
+    }
+
+    function addCommitmentBar(container, label, amount, total, color) {
+      const percentage = total > 0 ? (amount / total * 100).toFixed(1) : 0;
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <div class="flex justify-between mb-2">
+          <span class="font-semibold">${label}</span>
+          <span class="font-bold">${formatCurrency(amount)} (${percentage}%)</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${percentage}%; background: ${color};"></div>
+        </div>
+      `;
+      container.appendChild(div);
+    }
+
+    function updatePriorityList(totalIncome, profileRecords) {
+      const priorityEl = document.getElementById('priority-list');
+      priorityEl.innerHTML = '';
+      
+      if (totalIncome === 0) {
+        priorityEl.innerHTML = '<p class="text-gray-500">Configure sua renda para ver as prioridades</p>';
+        return;
+      }
+      
+      const debts = [];
+      
+      profileRecords.filter(r => r.type === 'temporary' && r.is_active).forEach(r => {
+        const remaining = r.installments_total - r.installments_paid;
+        const monthlyInstallment = r.amount / r.installments_total;
+        const totalRemaining = monthlyInstallment * remaining;
+        const impactPercentage = (monthlyInstallment / totalIncome) * 100;
+        
+        debts.push({
+          name: r.name,
+          type: 'Temporária',
+          monthly: monthlyInstallment,
+          total: totalRemaining,
+          impact: impactPercentage,
+          effectiveRate: 0
+        });
+      });
+
+      profileRecords.filter(r => r.type === 'invoice' && r.is_active).forEach(r => {
+        const remaining = r.installments_total - r.installments_paid;
+        const monthlyInstallment = r.amount / r.installments_total;
+        const totalRemaining = monthlyInstallment * remaining;
+        const impactPercentage = (monthlyInstallment / totalIncome) * 100;
+        
+        debts.push({
+          name: r.name,
+          type: 'Fatura',
+          monthly: monthlyInstallment,
+          total: totalRemaining,
+          impact: impactPercentage,
+          effectiveRate: 0
+        });
+      });
+      
+      profileRecords.filter(r => r.type === 'loan' && r.is_active).forEach(r => {
+        const monthlyPayment = calculateLoanPayment(r.amount, r.interest_rate, r.term_months);
+        const remaining = r.term_months - r.installments_paid;
+        const totalRemaining = monthlyPayment * remaining;
+        const impactPercentage = (monthlyPayment / totalIncome) * 100;
+        
+        debts.push({
+          name: r.name,
+          type: 'Empréstimo',
+          monthly: monthlyPayment,
+          total: totalRemaining,
+          impact: impactPercentage,
+          effectiveRate: r.interest_rate
+        });
+      });
+      
+      debts.sort((a, b) => {
+        const scoreA = a.impact * (1 + a.effectiveRate / 100);
+        const scoreB = b.impact * (1 + b.effectiveRate / 100);
+        return scoreB - scoreA;
+      });
+      
+      if (debts.length === 0) {
+        priorityEl.innerHTML = '<p class="text-gray-500">Nenhuma dívida cadastrada</p>';
+        return;
+      }
+      
+      debts.forEach((debt, index) => {
+        const div = document.createElement('div');
+        div.className = 'mb-4 p-4 bg-gray-50 rounded-lg';
+        div.innerHTML = `
+          <div class="flex items-start justify-between mb-2">
+            <div>
+              <span class="badge ${index === 0 ? 'badge-danger' : index === 1 ? 'badge-warning' : 'badge-info'}">
+                ${index + 1}º Prioridade
+              </span>
+              <h3 class="font-bold text-lg mt-2">${debt.name}</h3>
+              <p class="text-sm text-gray-600">${debt.type}</p>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-bold text-purple-600">${debt.impact.toFixed(1)}%</div>
+              <div class="text-xs text-gray-500">da renda</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span class="text-gray-600">Parcela mensal:</span>
+              <span class="font-semibold ml-2">${formatCurrency(debt.monthly)}</span>
+            </div>
+            <div>
+              <span class="text-gray-600">Total restante:</span>
+              <span class="font-semibold ml-2">${formatCurrency(debt.total)}</span>
+            </div>
+          </div>
+          ${debt.effectiveRate > 0 ? `<div class="mt-2 text-sm"><span class="text-gray-600">Taxa de juros:</span> <span class="font-semibold">${debt.effectiveRate}% a.m.</span></div>` : ''}
+        `;
+        priorityEl.appendChild(div);
+      });
+    }
+
+    function updateIncomeDisplay() {
+      const profileRecords = getProfileRecords();
+      const income = profileRecords.find(r => r.type === 'income');
+      const display = document.getElementById('income-display');
+      
+      if (income) {
+        document.getElementById('income-amount').value = income.amount;
+        display.innerHTML = `
+          <div class="p-4 bg-green-50 rounded-lg">
+            <div class="text-sm text-gray-600 mb-1">Renda Atual</div>
+            <div class="text-3xl font-bold text-green-600">${formatCurrency(income.amount)}</div>
+          </div>
+        `;
+      } else {
+        display.innerHTML = '';
+      }
+    }
+
+    function updateCardsDisplay() {
+      const profileRecords = getProfileRecords();
+      const cards = profileRecords.filter(r => r.type === 'card' && r.is_active);
+      const container = document.getElementById('cards-list');
+      container.innerHTML = '';
+      
+      if (cards.length === 0) {
+        container.innerHTML = '<p class="text-gray-500">Nenhum cartão cadastrado</p>';
+        return;
+      }
+      
+      cards.forEach(card => {
+        const invoices = profileRecords.filter(r => r.type === 'invoice' && r.card_id === card.__backendId && r.is_active);
+        const totalInvoices = invoices.reduce((sum, inv) => sum + (inv.amount / inv.installments_total), 0);
+        const usedPercentage = card.amount > 0 ? (totalInvoices / card.amount * 100).toFixed(1) : 0;
+        
+        const div = document.createElement('div');
+        div.className = 'mb-6 p-6 bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg';
+        div.innerHTML = `
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="font-bold text-xl">${card.name}</h3>
+              <p class="text-sm text-gray-600">Limite: ${formatCurrency(card.amount)}</p>
+              <p class="text-xs text-gray-500 mt-1">Fecha dia ${card.closing_day} • Vence dia ${card.due_day}</p>
+            </div>
+            <button class="btn-secondary text-red-600 hover:bg-red-50" onclick="deleteRecord('${card.__backendId}')">
+              Excluir
+            </button>
+          </div>
+          <div class="mb-4">
+            <div class="flex justify-between text-sm mb-2">
+              <span>Fatura Mensal: ${formatCurrency(totalInvoices)}</span>
+              <span class="font-bold ${usedPercentage > 80 ? 'text-red-600' : 'text-gray-700'}">${usedPercentage}% usado</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${usedPercentage}%; background: ${usedPercentage > 80 ? '#ef4444' : '#667eea'};"></div>
+            </div>
+          </div>
+          <div class="mb-4">
+            <h4 class="font-semibold mb-2 text-sm">Faturas (${invoices.length}):</h4>
+            <div class="space-y-2" id="invoices-${card.__backendId}"></div>
+          </div>
+          <button onclick="showInvoiceModal('${card.__backendId}')" class="btn-primary w-full">
+            ➕ Adicionar Fatura
+          </button>
+        `;
+        container.appendChild(div);
+        
+        const invoicesContainer = document.getElementById(`invoices-${card.__backendId}`);
+        if (invoices.length === 0) {
+          invoicesContainer.innerHTML = '<p class="text-sm text-gray-500">Nenhuma fatura cadastrada</p>';
+        } else {
+          invoices.forEach(invoice => {
+            const monthlyValue = invoice.amount / invoice.installments_total;
+            const remaining = invoice.installments_total - invoice.installments_paid;
+            const progress = (invoice.installments_paid / invoice.installments_total * 100).toFixed(0);
+            
+            const invDiv = document.createElement('div');
+            invDiv.className = 'p-3 bg-white rounded-lg text-sm';
+            invDiv.innerHTML = `
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <div class="font-semibold">${invoice.name}</div>
+                  <div class="text-xs text-gray-600">${formatCurrency(monthlyValue)}/mês • ${remaining} de ${invoice.installments_total} parcelas restantes</div>
+                </div>
+                <button class="text-red-600 hover:underline text-xs" onclick="deleteRecord('${invoice.__backendId}')">
+                  Excluir
+                </button>
+              </div>
+              <div class="progress-bar" style="height: 4px;">
+                <div class="progress-fill" style="width: ${progress}%;"></div>
+              </div>
+            `;
+            invoicesContainer.appendChild(invDiv);
+          });
+        }
+      });
+    }
+
+    function updateFixedDisplay() {
+      const profileRecords = getProfileRecords();
+      const fixed = profileRecords.filter(r => r.type === 'fixed' && r.is_active);
+      const container = document.getElementById('fixed-list');
+      container.innerHTML = '';
+      
+      if (fixed.length === 0) {
+        container.innerHTML = '<p class="text-gray-500">Nenhuma despesa fixa cadastrada</p>';
+        return;
+      }
+      
+      const income = profileRecords.find(r => r.type === 'income');
+      const totalIncome = income ? income.amount : 0;
+      
+      fixed.forEach(item => {
+        const percentage = totalIncome > 0 ? (item.amount / totalIncome * 100).toFixed(1) : 0;
+        const div = document.createElement('div');
+        div.className = 'mb-4 p-4 bg-gray-50 rounded-lg';
+        div.innerHTML = `
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <h3 class="font-bold">${item.name}</h3>
+              <p class="text-sm text-gray-600">${item.category} ${item.subcategory ? '› ' + item.subcategory : ''}</p>
+            </div>
+            <button class="btn-secondary text-red-600 hover:bg-red-50" onclick="deleteRecord('${item.__backendId}')">
+              Excluir
+            </button>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-xl font-bold text-purple-600">${formatCurrency(item.amount)}</span>
+            <span class="badge badge-info">${percentage}% da renda</span>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function updateTemporaryDisplay() {
+      const profileRecords = getProfileRecords();
+      const temp = profileRecords.filter(r => r.type === 'temporary' && r.is_active);
+      const container = document.getElementById('temporary-list');
+      container.innerHTML = '';
+      
+      if (temp.length === 0) {
+        container.innerHTML = '<p class="text-gray-500">Nenhuma despesa temporária cadastrada</p>';
+        return;
+      }
+      
+      const income = profileRecords.find(r => r.type === 'income');
+      const totalIncome = income ? income.amount : 0;
+      
+      temp.forEach(item => {
+        const remaining = item.installments_total - item.installments_paid;
+        const monthlyInstallment = item.amount / item.installments_total;
+        const totalRemaining = monthlyInstallment * remaining;
+        const percentage = totalIncome > 0 ? (monthlyInstallment / totalIncome * 100).toFixed(1) : 0;
+        const progress = (item.installments_paid / item.installments_total * 100).toFixed(0);
+        
+        const div = document.createElement('div');
+        div.className = 'mb-4 p-4 bg-gray-50 rounded-lg';
+        div.innerHTML = `
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <h3 class="font-bold">${item.name}</h3>
+              <p class="text-sm text-gray-600">${item.category} ${item.subcategory ? '› ' + item.subcategory : ''}</p>
+            </div>
+            <button class="btn-secondary text-red-600 hover:bg-red-50" onclick="deleteRecord('${item.__backendId}')">
+              Excluir
+            </button>
+          </div>
+          <div class="grid grid-cols-2 gap-4 mb-3">
+            <div>
+              <div class="text-xs text-gray-600">Parcela mensal</div>
+              <div class="text-lg font-bold text-purple-600">${formatCurrency(monthlyInstallment)}</div>
+              <div class="badge badge-info mt-1">${percentage}% da renda</div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-gray-600">Total restante</div>
+              <div class="text-lg font-bold text-orange-600">${formatCurrency(totalRemaining)}</div>
+              <div class="text-xs text-gray-500 mt-1">${remaining} de ${item.installments_total} parcelas</div>
+            </div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${progress}%;"></div>
+          </div>
+          <div class="text-xs text-gray-600 mt-1">${progress}% pago</div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function updateLoansDisplay() {
+      const profileRecords = getProfileRecords();
+      const loans = profileRecords.filter(r => r.type === 'loan' && r.is_active);
+      const container = document.getElementById('loans-list');
+      container.innerHTML = '';
+      
+      if (loans.length === 0) {
+        container.innerHTML = '<p class="text-gray-500">Nenhum empréstimo cadastrado</p>';
+        return;
+      }
+      
+      const income = profileRecords.find(r => r.type === 'income');
+      const totalIncome = income ? income.amount : 0;
+      
+      loans.forEach(item => {
+        const monthlyPayment = calculateLoanPayment(item.amount, item.interest_rate, item.term_months);
+        const remaining = item.term_months - item.installments_paid;
+        const totalRemaining = monthlyPayment * remaining;
+        const percentage = totalIncome > 0 ? (monthlyPayment / totalIncome * 100).toFixed(1) : 0;
+        const progress = (item.installments_paid / item.term_months * 100).toFixed(0);
+        
+        const div = document.createElement('div');
+        div.className = 'mb-4 p-4 bg-orange-50 rounded-lg border-l-4 border-orange-400';
+        div.innerHTML = `
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <h3 class="font-bold text-lg">${item.name}</h3>
+              <p class="text-sm text-gray-600">Taxa: ${item.interest_rate}% a.m. • Prazo: ${item.term_months} meses</p>
+            </div>
+            <button class="btn-secondary text-red-600 hover:bg-red-50" onclick="deleteRecord('${item.__backendId}')">
+              Excluir
+            </button>
+          </div>
+          <div class="grid grid-cols-3 gap-4 mb-3">
+            <div>
+              <div class="text-xs text-gray-600">Parcela mensal</div>
+              <div class="text-lg font-bold text-orange-600">${formatCurrency(monthlyPayment)}</div>
+              <div class="badge badge-warning mt-1">${percentage}% da renda</div>
+            </div>
+            <div>
+              <div class="text-xs text-gray-600">Total restante</div>
+              <div class="text-lg font-bold text-red-600">${formatCurrency(totalRemaining)}</div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-gray-600">Parcelas restantes</div>
+              <div class="text-lg font-bold">${remaining}</div>
+              <div class="text-xs text-gray-500">de ${item.term_months}</div>
+            </div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${progress}%; background: #f59e0b;"></div>
+          </div>
+          <div class="text-xs text-gray-600 mt-1">${progress}% pago</div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function updateGoalsDisplay() {
+      const profileRecords = getProfileRecords();
+      const goals = profileRecords.find(r => r.type === 'goals');
+      const display = document.getElementById('goals-display');
+      
+      if (goals) {
+        document.getElementById('goal-fixed').value = goals.category;
+        document.getElementById('goal-temporary').value = goals.subcategory;
+        document.getElementById('goal-loans').value = goals.amount;
+        document.getElementById('goal-leisure').value = goals.interest_rate;
+        document.getElementById('goal-savings').value = goals.term_months;
+        
+        const total = parseFloat(goals.category) + parseFloat(goals.subcategory) + 
+                     goals.amount + goals.interest_rate + goals.term_months;
+        
+        display.innerHTML = `
+          <div class="p-4 bg-blue-50 rounded-lg">
+            <h3 class="font-bold mb-3">Suas Metas Configuradas</h3>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span>Despesas Fixas:</span>
+                <span class="font-bold">${goals.category}%</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Despesas Temporárias:</span>
+                <span class="font-bold">${goals.subcategory}%</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Empréstimos:</span>
+                <span class="font-bold">${goals.amount}%</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Lazer:</span>
+                <span class="font-bold">${goals.interest_rate}%</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Reserva/Investimento:</span>
+                <span class="font-bold">${goals.term_months}%</span>
+              </div>
+              <div class="flex justify-between pt-2 border-t border-blue-200">
+                <span class="font-bold">Total:</span>
+                <span class="font-bold ${total > 100 ? 'text-red-600' : 'text-green-600'}">${total}%</span>
+              </div>
+              ${total > 100 ? '<p class="text-red-600 text-xs mt-2">⚠️ Total acima de 100%</p>' : ''}
+            </div>
+          </div>
+        `;
+      } else {
+        display.innerHTML = '';
+      }
+    }
+
+    async function updateTrackingDisplay() {
+      if (!currentProfile) return;
+      
+      const monthKey = getCurrentMonthKey();
+      const profileRecords = getProfileRecords();
+      
+      let totalToPay = 0;
+      let totalPaid = 0;
+      
+      const fixedList = document.getElementById('tracking-fixed-list');
+      fixedList.innerHTML = '';
+      
+      const fixedExpenses = profileRecords.filter(r => r.type === 'fixed' && r.is_active);
+      if (fixedExpenses.length === 0) {
+        fixedList.innerHTML = '<p class="text-gray-500 text-sm">Nenhuma despesa fixa cadastrada</p>';
+      } else {
+        for (const expense of fixedExpenses) {
+          const tracking = profileRecords.find(r => 
+            r.type === 'payment_tracking' && 
+            r.parent_id === expense.__backendId && 
+            r.month_year === monthKey
+          );
+          
+          const isPaid = tracking ? tracking.is_paid : false;
+          totalToPay += expense.amount;
+          if (isPaid) totalPaid += expense.amount;
+          
+          const div = document.createElement('div');
+          div.className = 'flex items-center justify-between p-3 bg-white rounded-lg mb-2';
+          div.innerHTML = `
+            <div class="flex-1">
+              <div class="font-semibold">${expense.name}</div>
+              <div class="text-sm text-gray-600">${formatCurrency(expense.amount)}</div>
+            </div>
+            <input type="checkbox" class="paid-checkbox" ${isPaid ? 'checked' : ''} 
+              onchange="togglePayment('${expense.__backendId}', 'fixed', ${expense.amount}, this.checked)">
+          `;
+          fixedList.appendChild(div);
+        }
+      }
+      
+      const invoicesList = document.getElementById('tracking-invoices-list');
+      invoicesList.innerHTML = '';
+      
+      const cards = profileRecords.filter(r => r.type === 'card' && r.is_active);
+      if (cards.length === 0) {
+        invoicesList.innerHTML = '<p class="text-gray-500 text-sm">Nenhum cartão cadastrado</p>';
+      } else {
+        for (const card of cards) {
+          const invoices = profileRecords.filter(r => r.type === 'invoice' && r.card_id === card.__backendId && r.is_active);
+          const totalInvoice = invoices.reduce((sum, inv) => sum + (inv.amount / inv.installments_total), 0);
+          
+          const tracking = profileRecords.find(r => 
+            r.type === 'payment_tracking' && 
+            r.parent_id === card.__backendId && 
+            r.month_year === monthKey
+          );
+          
+          const isPaid = tracking ? tracking.is_paid : false;
+          totalToPay += totalInvoice;
+          if (isPaid) totalPaid += totalInvoice;
+          
+          const div = document.createElement('div');
+          div.className = 'flex items-center justify-between p-3 bg-white rounded-lg mb-2';
+          div.innerHTML = `
+            <div class="flex-1">
+              <div class="font-semibold">${card.name}</div>
+              <div class="text-sm text-gray-600">${formatCurrency(totalInvoice)} • ${invoices.length} faturas</div>
+            </div>
+            <input type="checkbox" class="paid-checkbox" ${isPaid ? 'checked' : ''} 
+              onchange="togglePayment('${card.__backendId}', 'card', ${totalInvoice}, this.checked)">
+          `;
+          invoicesList.appendChild(div);
+        }
+      }
+      
+      const tempList = document.getElementById('tracking-temporary-list');
+      tempList.innerHTML = '';
+      
+      const tempExpenses = profileRecords.filter(r => r.type === 'temporary' && r.is_active);
+      if (tempExpenses.length === 0) {
+        tempList.innerHTML = '<p class="text-gray-500 text-sm">Nenhuma despesa temporária cadastrada</p>';
+      } else {
+        for (const expense of tempExpenses) {
+          const monthlyValue = expense.amount / expense.installments_total;
+          
+          const tracking = profileRecords.find(r => 
+            r.type === 'payment_tracking' && 
+            r.parent_id === expense.__backendId && 
+            r.month_year === monthKey
+          );
+          
+          const isPaid = tracking ? tracking.is_paid : false;
+          totalToPay += monthlyValue;
+          if (isPaid) totalPaid += monthlyValue;
+          
+          const div = document.createElement('div');
+          div.className = 'flex items-center justify-between p-3 bg-white rounded-lg mb-2';
+          div.innerHTML = `
+            <div class="flex-1">
+              <div class="font-semibold">${expense.name}</div>
+              <div class="text-sm text-gray-600">${formatCurrency(monthlyValue)}/mês</div>
+            </div>
+            <input type="checkbox" class="paid-checkbox" ${isPaid ? 'checked' : ''} 
+              onchange="togglePayment('${expense.__backendId}', 'temporary', ${monthlyValue}, this.checked)">
+          `;
+          tempList.appendChild(div);
+        }
+      }
+      
+      const loansList = document.getElementById('tracking-loans-list');
+      loansList.innerHTML = '';
+      
+      const loans = profileRecords.filter(r => r.type === 'loan' && r.is_active);
+      if (loans.length === 0) {
+        loansList.innerHTML = '<p class="text-gray-500 text-sm">Nenhum empréstimo cadastrado</p>';
+      } else {
+        for (const loan of loans) {
+          const monthlyValue = calculateLoanPayment(loan.amount, loan.interest_rate, loan.term_months);
+          
+          const tracking = profileRecords.find(r => 
+            r.type === 'payment_tracking' && 
+            r.parent_id === loan.__backendId && 
+            r.month_year === monthKey
+          );
+          
+          const isPaid = tracking ? tracking.is_paid : false;
+          totalToPay += monthlyValue;
+          if (isPaid) totalPaid += monthlyValue;
+          
+          const div = document.createElement('div');
+          div.className = 'flex items-center justify-between p-3 bg-white rounded-lg mb-2';
+          div.innerHTML = `
+            <div class="flex-1">
+              <div class="font-semibold">${loan.name}</div>
+              <div class="text-sm text-gray-600">${formatCurrency(monthlyValue)}/mês</div>
+            </div>
+            <input type="checkbox" class="paid-checkbox" ${isPaid ? 'checked' : ''} 
+              onchange="togglePayment('${loan.__backendId}', 'loan', ${monthlyValue}, this.checked)">
+          `;
+          loansList.appendChild(div);
+        }
+      }
+      
+      document.getElementById('tracking-total').textContent = formatCurrency(totalToPay);
+      document.getElementById('tracking-paid').textContent = formatCurrency(totalPaid);
+      document.getElementById('tracking-remaining').textContent = formatCurrency(totalToPay - totalPaid);
+    }
+
+    async function togglePayment(parentId, expenseType, amount, isPaid) {
+      if (!currentProfile) return;
+      if (currentRecordCount >= 999) {
+        alert('Limite de 999 registros atingido');
+        return;
+      }
+      
+      const monthKey = getCurrentMonthKey();
+      const profileRecords = getProfileRecords();
+      
+      const existingTracking = profileRecords.find(r => 
+        r.type === 'payment_tracking' && 
+        r.parent_id === parentId && 
+        r.month_year === monthKey
+      );
+      
+      if (existingTracking) {
+        existingTracking.is_paid = isPaid;
+        existingTracking.payment_date = isPaid ? new Date().toISOString() : null;
+        await window.dataSdk.update(existingTracking);
+      } else {
+        await window.dataSdk.create({
+          id: `tracking-${Date.now()}`,
+          type: 'payment_tracking',
+          parent_id: parentId,
+          month_year: monthKey,
+          amount: amount,
+          is_paid: isPaid,
+          payment_date: isPaid ? new Date().toISOString() : null,
+          profile_id: currentProfile.id,
+          category: expenseType,
+          created_at: new Date().toISOString()
+        });
+      }
+    }
+
+    async function deleteRecord(backendId) {
+      const record = allRecords.find(r => r.__backendId === backendId);
+      if (!record) return;
+      
+      const confirmDelete = document.createElement('div');
+      confirmDelete.className = 'inline-block mt-2';
+      confirmDelete.innerHTML = `
+        <button class="btn-secondary bg-red-100 text-red-600 mr-2" onclick="confirmDeleteAction('${backendId}')">
+          Confirmar Exclusão
+        </button>
+        <button class="btn-secondary" onclick="this.parentElement.remove()">
+          Cancelar
+        </button>
+      `;
+      event.target.parentElement.appendChild(confirmDelete);
+    }
+
+    async function confirmDeleteAction(backendId) {
+      const record = allRecords.find(r => r.__backendId === backendId);
+      if (!record) return;
+      
+      const result = await window.dataSdk.delete(record);
+      if (!result.isOk) {
+        console.error('Erro ao excluir registro');
+      }
+    }
+
+    function calculateLoanPayment(principal, monthlyRate, months) {
+      if (monthlyRate === 0) return principal / months;
+      const rate = monthlyRate / 100;
+      const payment = principal * (rate * Math.pow(1 + rate, months)) / (Math.pow(1 + rate, months) - 1);
+      return payment;
+    }
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      }).format(value);
+    }
+
+    window.deleteRecord = deleteRecord;
+    window.confirmDeleteAction = confirmDeleteAction;
+    window.selectProfile = selectProfile;
+    window.switchProfile = switchProfile;
+    window.showCreateProfileModal = showCreateProfileModal;
+    window.closeCreateProfileModal = closeCreateProfileModal;
+    window.showInvoiceModal = showInvoiceModal;
+    window.closeInvoiceModal = closeInvoiceModal;
+    window.changeMonth = changeMonth;
+    window.togglePayment = togglePayment;
+
+    initializeApp();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a35111063b61b33',t:'MTc2Mzk0NzA0Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
